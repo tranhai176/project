@@ -37,6 +37,7 @@ if (isset($_SESSION['user_login']['user_level'])) {
         define('STAFF', true);
     }
 }
+require_once '../config/database.php';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
