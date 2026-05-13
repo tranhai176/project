@@ -1,3 +1,37 @@
+<?php
+session_start();
+$login_error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_once 'config/database.php';
+    
+    $email = trim($_POST['email'] ?? '');
+    $password = trim($_POST['password'] ?? '');
+    
+    if (empty($email) || empty($password)) {
+        $login_error = 'Vui lòng nhập email và mật khẩu.';
+    } else {
+        $email = mysqli_real_escape_string($conn, $email);
+        $password = mysqli_real_escape_string($conn, $password);
+        
+        $sql = "SELECT id, username, email, full_name FROM users WHERE email = '$email' AND password = '$password'";
+        $result = mysqli_query($conn, $sql);
+        
+        if ($result && mysqli_num_rows($result) > 0) {
+            $user = mysqli_fetch_assoc($result);
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['full_name'] = $user['full_name'];
+            
+            header('Location: index.php?page_layout=home');
+            exit();
+        } else {
+            $login_error = 'Email hoặc mật khẩu không chính xác.';
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -117,7 +151,7 @@
                     <p class="text-muted mb-0 small">Nhập thông tin.</p>
                 </div>
 
-                <form method="post" action="./index.php">
+                <form method="post" action="login.php">
                     <?php if (!empty($login_error)): ?>
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <?php echo htmlspecialchars($login_error); ?>

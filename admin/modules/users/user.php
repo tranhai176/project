@@ -1,14 +1,41 @@
 ﻿
+<?php
+require_once __DIR__ . '/../../../config/database.php';
 
+// Xử lý delete
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
+    $deleteId = (int)$_POST['delete_id'];
+    
+    // Xóa thành viên
+    $deleteSql = "DELETE FROM users WHERE id = $deleteId";
+    if (mysqli_query($conn, $deleteSql)) {
+        header('Location: index.php?page_layout=user&msg=deleted');
+        exit();
+    }
+}
+
+$search = isset($_GET['q']) ? trim($_GET['q']) : '';
+$where = '';
+if ($search !== '') {
+    $searchEsc = mysqli_real_escape_string($conn, $search);
+    $where = "WHERE full_name LIKE '%$searchEsc%' OR email LIKE '%$searchEsc%' OR username LIKE '%$searchEsc%'";
+}
+$sql = "SELECT id, username, email, full_name, phone, created_at FROM users $where ORDER BY created_at DESC";
+$result = mysqli_query($conn, $sql);
+?>
                 <div class="card shadow-sm p-4">
+                    <?php if (isset($_GET['msg']) && $_GET['msg'] === 'deleted'): ?>
+                        <div class="alert alert-success">Xóa thành viên thành công!</div>
+                    <?php endif; ?>
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
                             <h2 class="h5 mb-1">Danh Sách Thành Viên</h2>
                         </div>
                         <a>
-                            <form class="d-flex" role="search">
-                                <input class="form-control form-control-sm me-2" type="search" placeholder="Tìm kiếm..." aria-label="Search">
-                                <a class="btn btn-sm btn-outline-secondary" type="submit">Tìm</a>
+                            <form class="d-flex" role="search" method="GET" action="index.php">
+                                <input type="hidden" name="page_layout" value="user">
+                                <input class="form-control form-control-sm me-2" type="search" name="q" value="<?php echo htmlspecialchars($search); ?>" placeholder="Tìm kiếm..." aria-label="Search">
+                                <button class="btn btn-sm btn-outline-secondary" type="submit">Tìm</button>
                             </form>
                         </a>
                         <a href="index.php?page_layout=add_user" class="btn btn-primary">Thêm Thành Viên</a>
@@ -20,85 +47,36 @@
                                     <th>ID</th>
                                     <th>Họ Tên</th>
                                     <th>Email</th>
-                                    <th>Số Điện Thoại</th>
-                                    <th>Trạng Thái</th>
+                                    <th>Tài Khoản</th>
+                                    <th>Điện Thoại</th>
                                     <th>Ngày Tạo</th>
                                     <th>Thao Tác</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Nguyễn Văn A</td>
-                                    <td>nguyenvana@gmail.com</td>
-                                    <td>0123-456-789</td>
-                                    <td><span class="badge bg-success">Hoạt động</span></td>
-                                    <td>2024-01-15</td>
-                                    <td>
-                                        <a href="index.php?page_layout=edit_user&id=1" class="btn btn-sm btn-outline-primary me-1">Sửa</a>
-                                        <a href="#" onclick="return confirm('Bạn có chắc muốn xóa thành viên này?')" class="btn btn-sm btn-outline-danger">Xóa</a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>Nguyễn Văn B</td>
-                                    <td>nguyenvanb@gmail.com</td>
-                                    <td>0987-654-321</td>
-                                    <td><span class="badge bg-success">Hoạt động</span></td>
-                                    <td>2024-02-20</td>
-                                    <td>
-                                        <a href="index.php?page_layout=edit_user&id=2" class="btn btn-sm btn-outline-primary me-1">Sửa</a>
-                                        <a href="#" onclick="return confirm('Bạn có chắc muốn xóa thành viên này?')" class="btn btn-sm btn-outline-danger">Xóa</a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>Nguyễn Văn C</td>
-                                    <td>nguyenvanc@gmail.com</td>
-                                    <td>0912-345-678</td>
-                                    <td><span class="badge bg-secondary">Không hoạt động</span></td>
-                                    <td>2024-03-10</td>
-                                    <td>
-                                        <a href="index.php?page_layout=edit_user&id=3" class="btn btn-sm btn-outline-primary me-1">Sửa</a>
-                                        <a href="#" onclick="return confirm('Bạn có chắc muốn xóa thành viên này?')" class="btn btn-sm btn-outline-danger">Xóa</a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>4</td>
-                                    <td>Nguyễn Văn D</td>
-                                    <td>nguyenvand@gmail.com</td>
-                                    <td>0901-234-567</td>
-                                    <td><span class="badge bg-success">Hoạt động</span></td>
-                                    <td>2024-04-05</td>
-                                    <td>
-                                        <a href="index.php?page_layout=edit_user&id=4" class="btn btn-sm btn-outline-primary me-1">Sửa</a>
-                                        <a href="#" onclick="return confirm('Bạn có chắc muốn xóa thành viên này?')" class="btn btn-sm btn-outline-danger">Xóa</a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>5</td>
-                                    <td>Trần Thị E</td>
-                                    <td>tranthie@gmail.com</td>
-                                    <td>0934-567-890</td>
-                                    <td><span class="badge bg-success">Hoạt động</span></td>
-                                    <td>2024-04-12</td>
-                                    <td>
-                                        <a href="index.php?page_layout=edit_user&id=5" class="btn btn-sm btn-outline-primary me-1">Sửa</a>
-                                        <a href="#" onclick="return confirm('Bạn có chắc muốn xóa thành viên này?')" class="btn btn-sm btn-outline-danger">Xóa</a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>6</td>
-                                    <td>Lê Văn F</td>
-                                    <td>levanf@gmail.com</td>
-                                    <td>0945-678-901</td>
-                                    <td><span class="badge bg-success">Hoạt động</span></td>
-                                    <td>2024-04-18</td>
-                                    <td>
-                                        <a href="index.php?page_layout=edit_user&id=6" class="btn btn-sm btn-outline-primary me-1">Sửa</a>
-                                        <a href="#" onclick="return confirm('Bạn có chắc muốn xóa thành viên này?')" class="btn btn-sm btn-outline-danger">Xóa</a>
-                                    </td>
-                                </tr>
+                                <?php if ($result && mysqli_num_rows($result) > 0): ?>
+                                    <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                                        <tr>
+                                            <td><?php echo $row['id']; ?></td>
+                                            <td><?php echo htmlspecialchars($row['full_name'] ?? 'N/A'); ?></td>
+                                            <td><?php echo htmlspecialchars($row['email']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['username']); ?></td>
+                                            <td><?php echo htmlspecialchars($row['phone'] ?? 'N/A'); ?></td>
+                                            <td><?php echo date('Y-m-d', strtotime($row['created_at'])); ?></td>
+                                            <td>
+                                                <a href="index.php?page_layout=edit_user&id=<?php echo $row['id']; ?>" class="btn btn-sm btn-outline-primary me-1">Sửa</a>
+                                                <form method="POST" style="display: inline;">
+                                                    <input type="hidden" name="delete_id" value="<?php echo $row['id']; ?>">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc muốn xóa thành viên này?')">Xóa</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted">Không tìm thấy thành viên nào.</td>
+                                    </tr>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>

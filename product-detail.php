@@ -1,37 +1,68 @@
-﻿
+﻿<?php
+$productId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if (!isset($conn) || !$conn) {
+    require_once 'config/database.php';
+}
+if (!$conn) {
+    echo '<div class="container-fluid my-4 px-4"><div class="alert alert-danger">Không thể kết nối tới cơ sở dữ liệu.</div></div>';
+    return;
+}
+$product = null;
+if ($productId > 0) {
+    $sql = "SELECT p.id, p.name, p.price, p.quantity, p.image, p.description, c.name AS category_name
+            FROM products p
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE p.id = $productId
+            LIMIT 1";
+    $result = mysqli_query($conn, $sql);
+    if ($result && mysqli_num_rows($result) > 0) {
+        $product = mysqli_fetch_assoc($result);
+    }
+}
+if (!$product) {
+    echo '<div class="container-fluid my-4 px-4"><div class="alert alert-warning">Sản phẩm không tồn tại hoặc đã bị xóa.</div></div>';
+    return;
+}
+$imagePath = !empty($product['image']) ? 'admin/imgs/' . htmlspecialchars($product['image']) : 'https://via.placeholder.com/600x400';
+$stockStatus = $product['quantity'] > 0 ? 'Còn hàng' : 'Hết hàng';
+?>
 
             <!-- Chi tiết sản phẩm -->
             <div class="container-fluid my-4 px-4">
-                <div class="row g-4">
+                <div class="row g-4 align-items-start">
                     <!-- Ảnh sản phẩm -->
                     <div class="col-lg-5">
                         <div class="product-image-container shadow-sm rounded-3 bg-white p-3">
-                            <img src="admin/imgs/hop-dung-giay-nhua-chu-nhat.jpg" class="img-fluid rounded-2 mb-3 product-main-img" alt="Hộp Giấy Tre Vuông">
+                            <img src="<?php echo $imagePath; ?>" class="img-fluid rounded-2 mb-3 product-main-img" alt="<?php echo htmlspecialchars($product['name']); ?>">
                         </div>
                     </div>
                     <!-- Thông tin sản phẩm -->
                     <div class="col-lg-7">
                         <div class="product-info bg-white rounded-3 shadow-sm p-4">
-                            <h1 class="product-title mb-2">8741 Hộp Giấy Tre Vuông 24/H 72/T</h1>
-                            <div class="d-flex gap-3 mb-3 flex-wrap">
-                                <span class="badge bg-light text-dark">Mã: 6925956387415</span>
-                                <span class="badge bg-success"><i class="fas fa-check fa-check-1"></i> Còn hàng</span>
-                                <span class="badge bg-primary text-white"><i class="fas fa-star fa-star-1"></i> 4.8 (245 đánh giá)</span>
+                            <h1 class="product-title mb-2"><?php echo htmlspecialchars($product['name']); ?></h1>
+                            <div class="product-badges">
+                                <span class="product-badge"><i class="fas fa-hashtag"></i> Mã: <?php echo $product['id']; ?></span>
+                                <span class="product-badge"><i class="fas fa-check"></i> <?php echo $stockStatus; ?></span>
+                                <span class="product-badge"><i class="fas fa-star"></i> 4.8 (245 đánh giá)</span>
                             </div>
                             <hr>
                             <div class="price-section mb-4">
                                 <p class="text-muted mb-1">Giá bán</p>
-                                <h2 class="price-large">45,000₫</h2>
-                                <p class="text-muted small">Giá gốc: <s>50,000₫</s> (Tiết kiệm 10%)</p>
+                                <h2 class="price-large"><?php echo number_format($product['price'], 0, ',', '.'); ?>₫</h2>
+                                <?php if ($product['quantity'] > 0): ?>
+                                    <p class="text-muted small">Kho: <?php echo $product['quantity']; ?> sản phẩm</p>
+                                <?php else: ?>
+                                    <p class="text-muted small">Hiện tại sản phẩm đang tạm hết hàng</p>
+                                <?php endif; ?>
                             </div>
                             <hr>
                             <div class="quantity-section mb-4">
                                 <label class="fw-bold mb-2 d-block"><i class="fas fa-box"></i> Số lượng:</label>
                                 <div class="d-flex gap-2 align-items-center">
-                                    <button class="btn btn-outline-secondary" onclick="document.querySelector('.qty-input').value = Math.max(1, parseInt(document.querySelector('.qty-input').value) - 1)">−</button>
-                                    <input type="number" value="1" min="1" class="form-control qty-input text-center qty-input-custom">
-                                    <button class="btn btn-outline-secondary" onclick="document.querySelector('.qty-input').value = parseInt(document.querySelector('.qty-input').value) + 1">+</button>
-                                    <span class="text-muted ms-2">Kho: 150 sản phẩm</span>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="document.querySelector('.qty-input').value = Math.max(1, parseInt(document.querySelector('.qty-input').value) - 1)">−</button>
+                                    <input type="number" value="1" min="1" class="form-control qty-input text-center qty-input-custom" style="width: 80px;">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="document.querySelector('.qty-input').value = parseInt(document.querySelector('.qty-input').value) + 1">+</button>
+                                    <span class="text-muted ms-2">Kho: <?php echo $product['quantity']; ?> sản phẩm</span>
                                 </div>
                             </div>
                             <hr>
@@ -52,16 +83,16 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="action-buttons d-flex gap-2 mb-4">
-                                <button class="btn btn-cart flex-grow-1"><i class="fas fa-shopping-cart"></i> THÊM VÀO GIỎ</button>
-                                <button class="btn btn-danger flex-grow-1"><i class="fas fa-bolt"></i> MUA NGAY</button>
+                            <div class="action-buttons mb-4">
+                                <button class="btn btn-cart"><i class="fas fa-shopping-cart"></i> THÊM VÀO GIỎ</button>
+                                <button class="btn btn-danger"><i class="fas fa-bolt"></i> MUA NGAY</button>
                             </div>
                             <hr>
                             <div class="policies">
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <div class="policy-item">
-                                            <i class="fa-solid fa-check fa-check-camket"></i>
+                                            <i class="fas fa-check"></i>
                                             <div>
                                                 <strong>Chính hãng 100%</strong>
                                                 <p class="text-muted small mb-0">Cam kết hàng chính hãng</p>
@@ -107,16 +138,16 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <h6 class="text-primary fw-bold mb-2">Tên sản phẩm</h6>
-                                    <p>Hộp Dụng Khăn Giấy Ăn Giấy Vệ Sinh Phong Cách Danshari</p>
+                                    <p><?php echo htmlspecialchars($product['name']); ?></p>
                                 </div>
                                 <div class="col-md-6">
-                                    <h6 class="text-primary fw-bold mb-2">Chất liệu</h6>
-                                    <p>Nhựa PP với nắp gỗ nhân tạo cao cấp</p>
+                                    <h6 class="text-primary fw-bold mb-2">Danh mục</h6>
+                                    <p><?php echo htmlspecialchars($product['category_name'] ?? 'Chưa phân loại'); ?></p>
                                 </div>
                             </div>
                             <hr>
                             <h6 class="text-primary fw-bold mb-2">Giới thiệu</h6>
-                            <p>Sản phẩm có bề ngoài đẹp mắt, thiết kế trang nhã, kích thước nhỏ gọn. Sản phẩm dùng để đựng giấy ăn, giấy vệ sinh, thích hợp nhiều không gian trong phòng khách, phòng ngủ hoặc văn phòng.</p>
+                            <p><?php echo nl2br(htmlspecialchars($product['description'] ?? 'Chưa có mô tả.')); ?></p>
                         </div>
 
                         <!-- Bình luận sản phẩm -->
@@ -169,4 +200,4 @@
                 </div>
             </div>
 
-                <!-- Footer -->
+                <!-- Footer --> -->

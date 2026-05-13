@@ -86,19 +86,20 @@ INSERT INTO categories (name, description) VALUES
 -- =====================================
 -- Insert Products
 -- =====================================
-INSERT INTO products (name, price, quantity, category_id, description) VALUES
-('Xô nhựa 10 lít', 85000, 45, 1, 'Xô nhựa bền vững, dung tích 10 lít, có tay cầm'),
-('Chảo chống dính 30cm', 385000, 20, 1, 'Chảo chống dính cao cấp, dùng được tất cả lò nướng'),
-('Dao cắt thái 8 inch', 250000, 15, 1, 'Dao cắt thái inox, lưỡi sắc bén'),
-('Xà phòng rửa tay 200ml', 45000, 120, 2, 'Xà phòng rửa tay kháng khuẩn, thơm lâu'),
-('Dầu gội đầu 500ml', 95000, 60, 2, 'Dầu gội thảo dược tự nhiên, phục hồi tóc'),
-('Bàn chải vệ sinh 18cm', 65000, 80, 2, 'Bàn chải vệ sinh toilet chất lượng cao'),
-('Hộp đựng thực phẩm 1.5L', 75000, 100, 3, 'Hộp nhựa đựng thực phẩm, an toàn vệ sinh'),
-('Giá để đồ nhà bếp', 180000, 25, 3, 'Giá sắt để đồ nhà bếp tiết kiệm không gian'),
-('Lọ chứa gia vị 500ml', 35000, 150, 3, 'Lọ nhựa trong suốt chứa gia vị'),
-('Túi đựng rác 55 lít', 125000, 200, 4, 'Túi rác tự hủy sinh học, bền và chắc'),
-('Chổi lau nhà với xô', 120000, 35, 4, 'Chổi lau nhà kèm xô vắt nước'),
-('Bàn chải bồn tắm', 55000, 90, 4, 'Bàn chải vệ sinh bồn tắm với tay cầm dài');
+INSERT INTO products (name, price, quantity, category_id, description, image) VALUES
+('Bàn Nhựa Xanh', 250000, 45, 1, 'Bàn nhựa màu xanh, chắc chắn, dễ lau chùi, thích hợp dùng trong gia đình hoặc ngoài trời', 'nhua-xanh.jpg'),
+('Bàn Nhựa Đỏ', 85000, 20, 1, 'Bàn nhựa màu đỏ, nhỏ gọn, tiện lợi cho không gian hẹp', 'nhua-do.jpg'),
+('Bát Phíp 6828 Vn 10/B 120/T', 10000, 15, 1, 'Bát phíp bền đẹp, nhẹ, dễ vệ sinh, phù hợp dùng trong bữa ăn hàng ngày', 'bat-phip.jpg'),
+('Hộp Giấy Mây 2123 SI', 17500, 120, 2, 'Hộp giấy mây tiện dụng, dùng để đựng khăn giấy, trang trí bàn ăn hoặc phòng khách', 'hop-giay-may.jpg'),
+('Bát 2141 SI 300/T 10/B', 5500, 60, 2, 'Bát nhựa nhỏ gọn, thích hợp dùng để đựng gia vị hoặc món ăn nhẹ', 'bat-5.5.jpg'),
+('Bàn Chải 018 TT (30/B)', 65000, 80, 2, 'Bàn chải vệ sinh đa năng, lông cứng, dùng để chà rửa sàn và các bề mặt khó làm sạch', 'Ban-chai-018-TT.png'),
+('8741 Hộp Giấy Tre Vuông 24/H 72/T', 45000, 100, 3, 'Hộp giấy tre vuông, thiết kế đẹp mắt, thân thiện môi trường, dùng để đựng khăn giấy', 'hop-dung-giay-nhua-chu-nhat.jpg'),
+('Ghế Nhựa Xanh', 120000, 25, 3, 'Ghế nhựa màu xanh, chắc chắn, dễ di chuyển, phù hợp cho phòng ăn hoặc ngoài trời', 'ghe-xanh.jpg'),
+('Ghế Nhựa Đỏ', 50000, 150, 3, 'Ghế nhựa màu đỏ, nhẹ, bền, dễ xếp chồng để tiết kiệm không gian', 'ghe-do.jpg'),
+('Bật Rác Vuông 10L Hokori 8061 Vn 3/D', 173000, 200, 4, 'Thùng rác vuông dung tích 10 lít, thiết kế nắp đậy kín, giữ vệ sinh và ngăn mùi hiệu quả', 'bat-rac-vuong-hokori.png'),
+('Bật Rác Tròn 66 - 2766 Sl', 245000, 35, 4, 'Thùng rác tròn dung tích lớn, chất liệu nhựa bền, thích hợp cho văn phòng hoặc gia đình', 'bat-rac-hong.jpg'),
+('Bàn Chải 1405 160/T 40/H', 19500, 90, 4, 'Bàn chải vệ sinh bồn tắm, tay cầm dài, dễ dàng làm sạch các góc khuất', 'Ban-chai-1405.png');
+
 
 -- =====================================
 -- Insert Users

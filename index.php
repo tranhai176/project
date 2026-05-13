@@ -8,7 +8,8 @@ include_once 'config/database.php';
 
 <head>
     <meta charset="UTF-8">
-    <title>Sieuthinhua</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siêu thị nhựa</title>
     <link rel="stylesheet" href="bootstrap-5.3.8-dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -25,24 +26,26 @@ include_once 'config/database.php';
 
         <!-- Logo + Banner + Tìm kiếm -->
         <div class="header-section">
+            <a href="index.php" class="home-btn-header"><i class="fas fa-home"></i>TRANG CHỦ</a>
             <div class="container-fluid py-3 border-bottom px-4">
                 <div class="row align-items-center">
                     <div class="col-md-2 text-center">
-                        <h3 class="fw-bold text-danger">Sieuthinhua.vn</h3>
+                        <h3 class="fw-bold text-danger">Siêu thị nhựa</h3>
                     </div>
                     <div class="col-md-6 text-center">
                         <h5 class="fw-bold">SIÊU THỊ NHỰA - VẠN SỰ LỰA CHỌN</h5>
                         <p>HỆ THỐNG CỬA HÀNG UY TÍN</p>
                     </div>
                     <div class="col-md-4">
-                        <div class="d-flex flex-wrap user-links py-2 px-3 gap-2">
-                            <a href="login.php" class="user-link flex-grow-1"><i class="bi bi-person me-1"></i>Đăng nhập/Đăng ký</a>
-                            <a href="#" class="user-link flex-grow-1"><i class="bi bi-gear me-1"></i>Tài khoản</a>
-                            <a href="index.php?page_layout=cart" class="user-link flex-grow-1"><i class="bi bi-cart me-1"></i>Giỏ hàng</a>
-                            <a href="contact.php" class="user-link flex-grow-1 text-warning fw-bold"><i class="bi bi-telephone me-1"></i>Liên hệ</a>
+                        <div class="d-flex flex-nowrap user-links py-2 px-2 gap-1">
+                            <a href="login.php" class="user-link"><i class="fas fa-user"></i><span>Đăng nhập/Đăng ký</span></a>
+                            <a href="#" class="user-link"><i class="fas fa-user-cog"></i><span>Tài khoản</span></a>
+                            <a href="index.php?page_layout=cart" class="user-link"><i class="fas fa-shopping-cart"></i><span>Giỏ</span></a>
+                            <a href="index.php?page_layout=contact" class="user-link text-warning fw-bold"><i class="fas fa-phone"></i><span>Liên hệ</span></a>
                         </div>
-                        <form class="d-flex mt-2">
-                            <input class="form-control form-control-sm me-2 search-input" type="search" placeholder="Tìm kiếm..."
+                        <form class="d-flex mt-2" method="GET" action="index.php">
+                            <input type="hidden" name="page_layout" value="home">
+                            <input class="form-control form-control-sm me-2 search-input" type="search" name="q" placeholder="Tìm kiếm..."
                                 aria-label="Search">
                             <button class="btn btn-sm search-btn" type="submit">Tìm</button>
                         </form>
@@ -52,43 +55,25 @@ include_once 'config/database.php';
         </div>
         <!-- Khung chứa danh mục + cam kết -->
         <div class="container-fluid my-3 px-4">
-            <div class="border rounded p-3 shadow-sm bg-white">
-                <div class="row align-items-center text-center">
-                    <!-- Accordion danh mục sản phẩm -->
-                    <div class="col-md-3">
-                        <div class="accordion accordion-overlay" id="accordionDanhMuc">
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingOne">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#collapseOne">
-                                        Danh mục sản phẩm
-                                    </button>
-                                </h2>
-                                <div id="collapseOne" class="accordion-collapse collapse"
-                                    data-bs-parent="#accordionDanhMuc">
-                                    <div class="accordion-body p-2">
-                                        <ul class="list-group list-group-flush">
-                                            <li class="list-group-item">Hộp Giấy Tre Vuông</li>
-                                            <li class="list-group-item">Bàn Chải</li>
-                                            <li class="list-group-item">Bàn</li>
-                                            <li class="list-group-item">Ghế</li>
-                                            <li class="list-group-item">Bát</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="section-card">
+                <div class="row align-items-center text-center features-row gx-3">
+                    <div class="col-md-4">
+                        <div class="feature-item">
+                            <i class="fas fa-list"></i>
+                            <span>Danh mục sản phẩm đa dạng</span>
                         </div>
                     </div>
-
-                    <!-- Các cam kết dịch vụ -->
-                    <div class="col-md-3">
-                        <i class="fas fa-check"></i> Đảm bảo chất lượng
+                    <div class="col-md-4">
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Cam kết chất lượng</span>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <i class="fas fa-truck"></i> Miễn phí vận chuyển
-                    </div>
-                    <div class="col-md-3">
-                        <i class="fas fa-box"></i> Mở hộp kiểm tra nhận hàng
+                    <div class="col-md-4">
+                        <div class="feature-item">
+                            <i class="fas fa-truck-fast"></i>
+                            <span>Giao hàng nhanh chóng</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -105,8 +90,9 @@ include_once 'config/database.php';
                     case 'cart':
                         include_once 'cart.php';
                         break;
-             
-                   
+                    case 'contact':
+                        include_once 'contact.php';
+                        break;
                     default:
                         include_once 'home.php';
                         break;
