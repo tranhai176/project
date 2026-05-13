@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -14,30 +14,7 @@
         font-size: 13px;
     }
 
-    .fa-star {
-        color: #ffcc00;
-        font-size: 1.5em;
-        margin-right: 10px;
-    }
-
-    .fa-box {
-        color: #b2cfdd;
-        font-size: 1.5em;
-        margin-right: 10px;
-
-    }
-
-    .fa-truck {
-        color: #00ffee;
-        font-size: 1.5em;
-        margin-right: 10px;
-    }
-
-    .fa-check {
-        color: #ff3300;
-        font-size: 1.5em;
-        margin-right: 10px;
-    }
+    
 
     .fa-home me-1 {
         color: #000000;
@@ -192,18 +169,18 @@
                     </div>
                     <div class="col-md-6 text-center">
                         <h5 class="fw-bold">SIÊU THỊ NHỰA - VẠN SỰ LỰA CHỌN</h5>
-                        <p>HỆ THỐNG CỬA HÀNG UY TÍN <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></p>
+                        <p>HỆ THỐNG CỬA HÀNG UY TÍN</p>
                     </div>
                     <div class="col-md-4">
                         <div class="d-flex justify-content-between user-links py-2 px-3 gap-2">
                             <a href="index.php" class="user-link">
-                                <i class="fas fa-home me-1"></i>Trang chủ
+                                Trang chủ
                             </a>
                             <a href="cart.php" class="user-link">
-                                <i class="fas fa-shopping-cart me-2"></i>Giỏ hàng
+                                Giỏ hàng
                             </a>
                             <a href="contact.php" class="user-link">
-                                <i class="fas fa-phone me-3"></i>Liên hệ
+                                Liên hệ
                             </a>
                         </div>
                         <form class="d-flex mt-2">

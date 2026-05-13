@@ -1,79 +1,169 @@
-﻿-- Bảng sản phẩm
-CREATE TABLE products (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
-    quantity INT DEFAULT 0,
-    category_id INT,
-    FOREIGN KEY (category_id) REFERENCES categories(id)
-);
+﻿-- =====================================
+-- Database: xe_shop (Plastic Items Store)
+-- =====================================
 
--- Bảng danh mục sản phẩm
+-- Drop existing tables if they exist
+DROP TABLE IF EXISTS order_items;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS users;
+
+-- =====================================
+-- Table: categories
+-- =====================================
 CREATE TABLE categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    description TEXT
-);
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Bảng người dùng
+-- =====================================
+-- Table: products
+-- =====================================
+CREATE TABLE products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    quantity INT DEFAULT 0,
+    category_id INT NOT NULL,
+    description TEXT,
+    image VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES categories(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================
+-- Table: users
+-- =====================================
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
+    username VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    full_name VARCHAR(100),
+    email VARCHAR(100) UNIQUE NOT NULL,
+    full_name VARCHAR(150),
+    phone VARCHAR(20),
+    address TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Bảng đơn hàng
+-- =====================================
+-- Table: orders
+-- =====================================
 CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    total DECIMAL(10,2) NOT NULL,
+    total DECIMAL(12, 2) NOT NULL,
     status VARCHAR(50) DEFAULT 'pending',
+    notes TEXT,
     FOREIGN KEY (user_id) REFERENCES users(id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Bảng chi tiết đơn hàng
+-- =====================================
+-- Table: order_items
+-- =====================================
 CREATE TABLE order_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
     product_id INT NOT NULL,
     quantity INT NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (order_id) REFERENCES orders(id),
+    price DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Thêm dữ liệu mẫu cho categories
-INSERT INTO categories (name, description)
-VALUES 
-('Đồ nhựa gia dụng', 'Các sản phẩm nhựa dùng trong gia đình'),
-('Đồ vệ sinh cá nhân', 'Bàn chải, khăn giấy, sản phẩm chăm sóc cá nhân');
+-- =====================================
+-- Insert Categories
+-- =====================================
+INSERT INTO categories (name, description) VALUES
+('Gia dụng nhà bếp', 'Các sản phẩm nhựa tiện dụng cho nhà bếp'),
+('Vệ sinh cá nhân', 'Sản phẩm vệ sinh và chăm sóc cá nhân'),
+('Chứa đựng', 'Hộp, thùng, lọ nhựa chứa đựng'),
+('Dụng cụ làm sạch', 'Chổi, chùi rửa, dụng cụ vệ sinh');
 
--- Thêm dữ liệu mẫu cho products
-INSERT INTO products (name, price, quantity, category_id)
-VALUES 
-('Hộp Giấy Tre Vuông', 45000, 10, 1),
-('Bàn Chải 018 TT', 18000, 50, 2),
-('Bàn Chải 1405', 19500, 30, 2);
+-- =====================================
+-- Insert Products
+-- =====================================
+INSERT INTO products (name, price, quantity, category_id, description) VALUES
+('Xô nhựa 10 lít', 85000, 45, 1, 'Xô nhựa bền vững, dung tích 10 lít, có tay cầm'),
+('Chảo chống dính 30cm', 385000, 20, 1, 'Chảo chống dính cao cấp, dùng được tất cả lò nướng'),
+('Dao cắt thái 8 inch', 250000, 15, 1, 'Dao cắt thái inox, lưỡi sắc bén'),
+('Xà phòng rửa tay 200ml', 45000, 120, 2, 'Xà phòng rửa tay kháng khuẩn, thơm lâu'),
+('Dầu gội đầu 500ml', 95000, 60, 2, 'Dầu gội thảo dược tự nhiên, phục hồi tóc'),
+('Bàn chải vệ sinh 18cm', 65000, 80, 2, 'Bàn chải vệ sinh toilet chất lượng cao'),
+('Hộp đựng thực phẩm 1.5L', 75000, 100, 3, 'Hộp nhựa đựng thực phẩm, an toàn vệ sinh'),
+('Giá để đồ nhà bếp', 180000, 25, 3, 'Giá sắt để đồ nhà bếp tiết kiệm không gian'),
+('Lọ chứa gia vị 500ml', 35000, 150, 3, 'Lọ nhựa trong suốt chứa gia vị'),
+('Túi đựng rác 55 lít', 125000, 200, 4, 'Túi rác tự hủy sinh học, bền và chắc'),
+('Chổi lau nhà với xô', 120000, 35, 4, 'Chổi lau nhà kèm xô vắt nước'),
+('Bàn chải bồn tắm', 55000, 90, 4, 'Bàn chải vệ sinh bồn tắm với tay cầm dài');
 
--- Thêm dữ liệu mẫu cho users
-INSERT INTO users (username, password, email, full_name)
-VALUES 
-('hai123', 'matkhau123', 'hai@example.com', 'Nguyễn Văn Hải'),
-('thao456', 'matkhau456', 'thao@example.com', 'Trần Thị Thảo');
+-- =====================================
+-- Insert Users
+-- =====================================
+INSERT INTO users (username, password, email, full_name, phone, address) VALUES
+('admin', 'admin123', 'admin@plasticstore.com', 'Quản Trị Viên', '0399999999', 'Hà Nội'),
+('nguyenvana', 'password123', 'nguyenvana@example.com', 'Nguyễn Văn A', '0912345678', '123 Đường Trần Hưng Đạo, TP.HCM'),
+('tranthib', 'password456', 'tranthib@example.com', 'Trần Thị B', '0987654321', '456 Đường Nguyễn Huệ, Hà Nội'),
+('levanc', 'password789', 'levanc@example.com', 'Lê Văn C', '0901234567', '789 Đường Tây Sơn, Đà Nẵng'),
+('phamthid', 'password321', 'phamthid@example.com', 'Phạm Thị D', '0911111111', '321 Đường Hải Phòng, Hải Phòng');
 
--- Thêm dữ liệu mẫu cho orders
-INSERT INTO orders (user_id, total, status)
-VALUES 
-(1, 65000, 'completed'),
-(2, 18000, 'pending');
+-- =====================================
+-- Insert Orders
+-- =====================================
+INSERT INTO orders (user_id, total, status, notes, order_date) VALUES
+(2, 505000, 'pending', 'Chờ xác nhận', DATE_SUB(NOW(), INTERVAL 0 DAY)),
+(3, 260000, 'processing', 'Đang chuẩn bị hàng', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(2, 345000, 'completed', 'Hoàn tất', DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(4, 420000, 'delivered', 'Đã giao hàng', DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(5, 180000, 'pending', 'Chờ xác nhận', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(2, 750000, 'processing', 'Đang xử lý', DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(3, 290000, 'cancelled', 'Đã hủy', DATE_SUB(NOW(), INTERVAL 6 DAY)),
+(4, 620000, 'delivered', 'Đã giao hàng', DATE_SUB(NOW(), INTERVAL 7 DAY));
 
--- Thêm dữ liệu mẫu cho order_items
-INSERT INTO order_items (order_id, product_id, quantity, price)
-VALUES 
-(1, 1, 1, 45000),  -- Hộp Giấy Tre Vuông
-(1, 2, 2, 20000),  -- Bàn Chải 018 TT
-(2, 2, 1, 18000);  -- Bàn Chải 018 TT
+-- =====================================
+-- Insert Order Items
+-- =====================================
+INSERT INTO order_items (order_id, product_id, quantity, price) VALUES
+-- Order 1: 505,000
+(1, 1, 2, 85000),
+(1, 4, 1, 95000),
+(1, 7, 3, 75000),
+-- Order 2: 260,000
+(2, 2, 1, 385000),
+(2, 6, 1, 65000),
+-- Order 3: 345,000
+(3, 3, 1, 250000),
+(3, 5, 2, 45000),
+(3, 9, 1, 35000),
+-- Order 4: 420,000
+(4, 1, 3, 85000),
+(4, 8, 1, 180000),
+(4, 10, 1, 125000),
+-- Order 5: 180,000
+(5, 7, 2, 75000),
+(5, 6, 1, 65000),
+-- Order 6: 750,000
+(6, 2, 1, 385000),
+(6, 4, 2, 95000),
+(6, 5, 3, 45000),
+(6, 11, 1, 120000),
+-- Order 7: 290,000
+(7, 3, 1, 250000),
+(7, 9, 1, 35000),
+-- Order 8: 620,000
+(8, 1, 2, 85000),
+(8, 8, 2, 180000),
+(8, 12, 1, 55000);
+
+-- =====================================
+-- Create Indexes for Better Performance
+-- =====================================
+CREATE INDEX idx_products_category ON products(category_id);
+CREATE INDEX idx_orders_user ON orders(user_id);
+CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_orders_date ON orders(order_date);
+CREATE INDEX idx_order_items_order ON order_items(order_id);
+CREATE INDEX idx_order_items_product ON order_items(product_id);
