@@ -15,12 +15,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
 }
 
 $search = isset($_GET['q']) ? trim($_GET['q']) : '';
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$limit = 10;
+$offset = ($page - 1) * $limit;
 $where = '';
 if ($search !== '') {
     $searchEsc = mysqli_real_escape_string($conn, $search);
     $where = "WHERE full_name LIKE '%$searchEsc%' OR email LIKE '%$searchEsc%' OR username LIKE '%$searchEsc%'";
 }
-$sql = "SELECT id, username, email, full_name, phone, created_at FROM users $where ORDER BY created_at DESC";
+$totalSql = "SELECT COUNT(*) AS total FROM users $where";
+$totalResult = mysqli_query($conn, $totalSql);
+$totalRows = 0;
+if ($totalResult && $rowCount = mysqli_fetch_assoc($totalResult)) {
+    $totalRows = (int)$rowCount['total'];
+}
+$totalPages = max(1, (int)ceil($totalRows / $limit));
+if ($page > $totalPages) {
+    $page = $totalPages;
+    $offset = ($page - 1) * $limit;
+}
+$sql = "SELECT id, username, email, full_name, phone, created_at FROM users $where ORDER BY created_at DESC LIMIT $limit OFFSET $offset";
 $result = mysqli_query($conn, $sql);
 ?>
                 <div class="card shadow-sm p-4">
@@ -83,14 +97,24 @@ $result = mysqli_query($conn, $sql);
                     <!-- Phân trang -->
                     <nav aria-label="Page navigation" class="mt-4">
                         <ul class="pagination justify-content-center">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1">Trước</a>
+                            <?php
+                                $baseUrl = 'index.php?page_layout=user';
+                                if ($search !== '') {
+                                    $baseUrl .= '&q=' . urlencode($search);
+                                }
+                                $prevPage = max(1, $page - 1);
+                                $nextPage = min($totalPages, $page + 1);
+                            ?>
+                            <li class="page-item <?php echo $page === 1 ? 'disabled' : ''; ?>">
+                                <a class="page-link" href="<?php echo $baseUrl . '&page=' . $prevPage; ?>" tabindex="-1">Trước</a>
                             </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">Tiếp</a>
+                            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                <li class="page-item <?php echo $page === $i ? 'active' : ''; ?>">
+                                    <a class="page-link" href="<?php echo $baseUrl . '&page=' . $i; ?>"><?php echo $i; ?></a>
+                                </li>
+                            <?php endfor; ?>
+                            <li class="page-item <?php echo $page === $totalPages ? 'disabled' : ''; ?>">
+                                <a class="page-link" href="<?php echo $baseUrl . '&page=' . $nextPage; ?>">Tiếp</a>
                             </li>
                         </ul>
                     </nav>

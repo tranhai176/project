@@ -26,7 +26,7 @@ include_once 'config/database.php';
 
         <!-- Logo + Banner + Tìm kiếm -->
         <div class="header-section">
-            <a href="index.php" class="home-btn-header"><i class="fas fa-home"></i>TRANG CHỦ</a>
+            <a href="index.php" class="home-btn-header"><i class="fas fa-home"></i></a>
             <div class="container-fluid py-3 border-bottom px-4">
                 <div class="row align-items-center">
                     <div class="col-md-2 text-center">

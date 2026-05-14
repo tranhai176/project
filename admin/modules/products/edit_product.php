@@ -19,30 +19,84 @@ $product = mysqli_fetch_assoc($result);
 $categorySql = "SELECT id, name FROM categories ORDER BY name";
 $categoryResult = mysqli_query($conn, $categorySql);
 
+$errors = [];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = mysqli_real_escape_string($conn, $_POST['product_name'] ?? '');
     $price = (float)($_POST['price'] ?? 0);
     $quantity = (int)($_POST['stock'] ?? 0);
     $description = mysqli_real_escape_string($conn, $_POST['description'] ?? '');
     $categoryId = (int)($_POST['category'] ?? 0);
+    $image = $product['image'];
 
-    $updateSql = "UPDATE products SET name = '$name', price = $price, quantity = $quantity, description = '$description', category_id = $categoryId WHERE id = $productId";
+    if (isset($_POST['remove_image']) && $_POST['remove_image'] === '1') {
+        if (!empty($image)) {
+            $oldImagePath = __DIR__ . '/../../../admin/imgs/' . $image;
+            if (file_exists($oldImagePath)) {
+                unlink($oldImagePath);
+            }
+        }
+        $image = '';
+    }
 
-    if (mysqli_query($conn, $updateSql)) {
-        echo '<div class="alert alert-success">Cập nhật sản phẩm thành công!</div>';
-        $product['name'] = $name;
-        $product['price'] = $price;
-        $product['quantity'] = $quantity;
-        $product['description'] = $description;
-        $product['category_id'] = $categoryId;
-    } else {
-        echo '<div class="alert alert-danger">Lỗi: ' . mysqli_error($conn) . '</div>';
+    if (isset($_FILES['image']) && $_FILES['image']['size'] > 0) {
+        $file = $_FILES['image'];
+        $allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+        if (!in_array($file['type'], $allowed)) {
+            $errors[] = 'Định dạng ảnh không hợp lệ. Chỉ chấp nhận JPEG, PNG, GIF, WebP.';
+        } elseif ($file['size'] > 5 * 1024 * 1024) {
+            $errors[] = 'Kích thước ảnh không được vượt quá 5MB.';
+        } else {
+            $uploadDir = __DIR__ . '/../../../admin/imgs/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            $filename = time() . '_' . basename($file['name']);
+            $filepath = $uploadDir . $filename;
+
+            if (move_uploaded_file($file['tmp_name'], $filepath)) {
+                if (!empty($image)) {
+                    $oldImagePath = $uploadDir . $image;
+                    if (file_exists($oldImagePath)) {
+                        unlink($oldImagePath);
+                    }
+                }
+                $image = $filename;
+            } else {
+                $errors[] = 'Lỗi tải file lên.';
+            }
+        }
+    }
+
+    if (empty($errors)) {
+        $updateSql = "UPDATE products SET name = '$name', price = $price, quantity = $quantity, description = '$description', category_id = $categoryId, image = '" . mysqli_real_escape_string($conn, $image) . "' WHERE id = $productId";
+
+        if (mysqli_query($conn, $updateSql)) {
+            echo '<div class="alert alert-success">Cập nhật sản phẩm thành công!</div>';
+            $product['name'] = $name;
+            $product['price'] = $price;
+            $product['quantity'] = $quantity;
+            $product['description'] = $description;
+            $product['category_id'] = $categoryId;
+            $product['image'] = $image;
+        } else {
+            $errors[] = 'Lỗi: ' . mysqli_error($conn);
+        }
     }
 }
 ?>
                 <div class="card shadow-sm p-4">
                     <h2 class="h5 mb-4">Sửa Thông Tin Sản Phẩm</h2>
-                    <form method="POST">
+                    <?php if (!empty($errors)): ?>
+                        <div class="alert alert-danger">
+                            <?php foreach ($errors as $error): ?>
+                                <div>- <?php echo htmlspecialchars($error); ?></div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                    <form method="POST" enctype="multipart/form-data">
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label for="product_name" class="form-label">Tên Sản Phẩm</label>
@@ -75,11 +129,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="mb-3 text-center">
                                     <img src="imgs/<?php echo htmlspecialchars($product['image']); ?>" class="img-fluid rounded" alt="<?php echo htmlspecialchars($product['name']); ?>" width="200px" onerror="this.src='https://via.placeholder.com/200'">
                                 </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="remove_image" name="remove_image" value="1">
+                                    <label class="form-check-label" for="remove_image">Xóa ảnh hiện tại</label>
+                                </div>
                             <?php else: ?>
                                 <div class="mb-3 text-center">
                                     <img src="https://via.placeholder.com/200" class="img-fluid rounded" alt="No image">
                                 </div>
                             <?php endif; ?>
+                        </div>
+                        <div class="mb-3">
+                            <label for="image" class="form-label">Thay Đổi Hình Ảnh</label>
+                            <input class="form-control" type="file" id="image" name="image" accept="image/*">
                         </div>
                         <div class="mb-3">
                             <label for="description" class="form-label">Mô Tả Sản Phẩm</label>

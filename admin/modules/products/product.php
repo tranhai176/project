@@ -7,45 +7,77 @@ if (!isset($conn)) {
 }
 
 // Xử lý delete
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
-    $deleteId = (int)$_POST['delete_id'];
-    
-    // Lấy thông tin sản phẩm để xóa ảnh
-    $productSql = "SELECT image FROM products WHERE id = $deleteId";
-    $productResult = mysqli_query($conn, $productSql);
-    
-    if ($productResult && $row = mysqli_fetch_assoc($productResult)) {
-        // Xóa file ảnh nếu tồn tại
-        if (!empty($row['image'])) {
-            $imgPath = __DIR__ . '/../../../admin/imgs/' . $row['image'];
-            if (file_exists($imgPath)) {
-                unlink($imgPath);
+$successMessage = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['delete_id'])) {
+        $deleteId = (int)$_POST['delete_id'];
+        
+        // Lấy thông tin sản phẩm để xóa ảnh
+        $productSql = "SELECT image FROM products WHERE id = $deleteId";
+        $productResult = mysqli_query($conn, $productSql);
+        
+        if ($productResult && $row = mysqli_fetch_assoc($productResult)) {
+            // Xóa file ảnh nếu tồn tại
+            if (!empty($row['image'])) {
+                $imgPath = __DIR__ . '/../../../admin/imgs/' . $row['image'];
+                if (file_exists($imgPath)) {
+                    unlink($imgPath);
+                }
             }
+        }
+        
+        // Xóa sản phẩm khỏi DB
+        $deleteSql = "DELETE FROM products WHERE id = $deleteId";
+        if (mysqli_query($conn, $deleteSql)) {
+            header('Location: index.php?page_layout=product&msg=deleted');
+            exit();
         }
     }
     
-    // Xóa sản phẩm khỏi DB
-    $deleteSql = "DELETE FROM products WHERE id = $deleteId";
-    if (mysqli_query($conn, $deleteSql)) {
-        header('Location: index.php?page_layout=product&msg=deleted');
-        exit();
+    if (isset($_POST['update_quantity_id'])) {
+        $updateId = (int)$_POST['update_quantity_id'];
+        $newQuantity = max(0, (int)($_POST['quantity'] ?? 0));
+        $updateSql = "UPDATE products SET quantity = $newQuantity WHERE id = $updateId";
+        if (mysqli_query($conn, $updateSql)) {
+            $successMessage = 'Cập nhật số lượng thành công!';
+        } else {
+            $successMessage = 'Không thể cập nhật số lượng: ' . mysqli_error($conn);
+        }
     }
 }
 
 $search = isset($_GET['q']) ? trim($_GET['q']) : '';
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$limit = 10;
 $where = '';
 if ($search !== '') {
     $searchEsc = mysqli_real_escape_string($conn, $search);
     $where = "WHERE p.name LIKE '%$searchEsc%' OR c.name LIKE '%$searchEsc%'";
 }
+$countSql = "SELECT COUNT(*) AS total FROM products p LEFT JOIN categories c ON p.category_id = c.id $where";
+$countResult = mysqli_query($conn, $countSql);
+$totalRows = 0;
+if ($countResult && $countRow = mysqli_fetch_assoc($countResult)) {
+    $totalRows = (int)$countRow['total'];
+}
+$totalPages = max(1, (int)ceil($totalRows / $limit));
+if ($page > $totalPages) {
+    $page = $totalPages;
+}
+$offset = ($page - 1) * $limit;
 $sql = "SELECT p.id, p.name, p.price, p.quantity, p.image, c.name as category_name, c.id as category_id 
         FROM products p 
         LEFT JOIN categories c ON p.category_id = c.id 
         $where 
-        ORDER BY p.id DESC";
+        ORDER BY p.id ASC 
+        LIMIT $limit OFFSET $offset";
 $result = mysqli_query($conn, $sql);
 ?>
                 <div class="card shadow-sm p-4">
+                    <?php if (!empty($successMessage)): ?>
+                        <div class="alert alert-success"><?php echo htmlspecialchars($successMessage); ?></div>
+                    <?php endif; ?>
                     <?php if (isset($_GET['msg']) && $_GET['msg'] === 'deleted'): ?>
                         <div class="alert alert-success">Xóa sản phẩm thành công!</div>
                     <?php endif; ?>
@@ -115,14 +147,24 @@ $result = mysqli_query($conn, $sql);
                     <!-- Phân trang -->
                     <nav aria-label="Page navigation" class="mt-4">
                         <ul class="pagination justify-content-center">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1">Trước</a>
+                            <?php
+                                $baseUrl = 'index.php?page_layout=product';
+                                if ($search !== '') {
+                                    $baseUrl .= '&q=' . urlencode($search);
+                                }
+                                $prevPage = max(1, $page - 1);
+                                $nextPage = min($totalPages, $page + 1);
+                            ?>
+                            <li class="page-item <?php echo $page === 1 ? 'disabled' : ''; ?>">
+                                <a class="page-link" href="<?php echo $baseUrl . '&page=' . $prevPage; ?>" tabindex="-1">Trước</a>
                             </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">Tiếp</a>
+                            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                <li class="page-item <?php echo $page === $i ? 'active' : ''; ?>">
+                                    <a class="page-link" href="<?php echo $baseUrl . '&page=' . $i; ?>"><?php echo $i; ?></a>
+                                </li>
+                            <?php endfor; ?>
+                            <li class="page-item <?php echo $page === $totalPages ? 'disabled' : ''; ?>">
+                                <a class="page-link" href="<?php echo $baseUrl . '&page=' . $nextPage; ?>">Tiếp</a>
                             </li>
                         </ul>
                     </nav>

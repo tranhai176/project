@@ -9,6 +9,9 @@ if (!isset($conn)) {
 
 $search = isset($_GET['q']) ? trim($_GET['q']) : '';
 $statusFilter = isset($_GET['status']) ? trim($_GET['status']) : '';
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$limit = 10;
+$offset = ($page - 1) * $limit;
 
 $where = [];
 if ($search !== '') {
@@ -21,11 +24,24 @@ if ($statusFilter !== '') {
 }
 $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
+$totalSql = "SELECT COUNT(*) AS total FROM orders o LEFT JOIN users u ON o.user_id = u.id $whereSql";
+$totalResult = mysqli_query($conn, $totalSql);
+$totalRows = 0;
+if ($totalResult && $rowCount = mysqli_fetch_assoc($totalResult)) {
+    $totalRows = (int)$rowCount['total'];
+}
+$totalPages = max(1, (int)ceil($totalRows / $limit));
+if ($page > $totalPages) {
+    $page = $totalPages;
+    $offset = ($page - 1) * $limit;
+}
+
 $sql = "SELECT o.id, o.user_id, o.order_date, o.total, o.status, u.full_name, u.email 
         FROM orders o 
         LEFT JOIN users u ON o.user_id = u.id 
         $whereSql 
-        ORDER BY o.order_date DESC";
+        ORDER BY o.order_date DESC 
+        LIMIT $limit OFFSET $offset";
 $result = mysqli_query($conn, $sql);
 
 function badgeClass($status) {
@@ -106,19 +122,31 @@ $statusLabel = [
                     <!-- Phân trang -->
                     <nav aria-label="Page navigation" class="mt-4">
                         <ul class="pagination justify-content-center">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1">Trước</a>
+                            <?php
+                                $baseUrl = 'index.php?page_layout=orders';
+                                if ($search !== '') {
+                                    $baseUrl .= '&q=' . urlencode($search);
+                                }
+                                if ($statusFilter !== '') {
+                                    $baseUrl .= '&status=' . urlencode($statusFilter);
+                                }
+                                $prevPage = max(1, $page - 1);
+                                $nextPage = min($totalPages, $page + 1);
+                            ?>
+                            <li class="page-item <?php echo $page === 1 ? 'disabled' : ''; ?>">
+                                <a class="page-link" href="<?php echo $baseUrl . '&page=' . $prevPage; ?>" tabindex="-1">Trước</a>
                             </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">Tiếp</a>
+                            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                <li class="page-item <?php echo $page === $i ? 'active' : ''; ?>">
+                                    <a class="page-link" href="<?php echo $baseUrl . '&page=' . $i; ?>"><?php echo $i; ?></a>
+                                </li>
+                            <?php endfor; ?>
+                            <li class="page-item <?php echo $page === $totalPages ? 'disabled' : ''; ?>">
+                                <a class="page-link" href="<?php echo $baseUrl . '&page=' . $nextPage; ?>">Tiếp</a>
                             </li>
                         </ul>
                     </nav>
                 </div>
-                       
                     </div>
                     <!-- Phân trang -->
                     
