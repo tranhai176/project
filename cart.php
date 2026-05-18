@@ -1,5 +1,25 @@
 ﻿<?php
-require_once 'config/database.php';
+include_once 'config/database.php';
+
+
+$deleteError = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
+    $deleteId = (int)$_POST['delete_id'];
+
+    if (!empty($productIds)) {
+        $idsString = implode(', ', $productIds);
+        mysqli_query($conn, "DELETE FROM order_items WHERE product_id IN ($idsString)");
+        mysqli_query($conn, "DELETE FROM products WHERE id IN ($idsString)");
+    }
+
+    $deleteSql = "DELETE FROM categories WHERE id = $deleteId";
+    if (mysqli_query($conn, $deleteSql)) {
+        header('Location: index.php?page_layout=category&msg=deleted');
+        exit();
+    } else {
+        $deleteError = 'Lỗi khi xóa danh mục: ' . mysqli_error($conn);
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['remove_item'])) {
@@ -52,13 +72,16 @@ if (isset($conn)) {
         }
     }
 }
+
+// Note: add-to-cart is handled globally in index.php to allow adding from any page.
+
 ?>
 <div class="container-fluid my-5">
     <div class="section-title"><i class="fas fa-shopping-cart"></i> Giỏ hàng của bạn</div>
     <div class="row gy-4">
         <div class="col-lg-8">
             <?php if ($cartEmpty): ?>
-                <div class="alert alert-warning page-alert">Giỏ hàng của bạn đang trống. Hãy thêm sản phẩm vào giỏ để tiếp tục mua sắm.</div>
+                <div class="alert alert-warning page-alert">Hãy thêm sản phẩm vào giỏ để tiếp tục mua sắm.</div>
             <?php else: ?>
                 <form method="POST" action="index.php?page_layout=cart">
                     <input type="hidden" name="update_cart" value="1">
@@ -89,7 +112,7 @@ if (isset($conn)) {
                                         </td>
                                         <td class="fw-bold product-price"><?= number_format($item['subtotal'], 0, ',', '.') ?>₫</td>
                                         <td class="text-end">
-                                            <button type="submit" name="remove_item" value="<?= $item['id'] ?>" class="btn btn-danger btn-sm">Xóa</button>
+                                            <button type="submit" name="remove_item" value="<?php echo $item['id']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?')">Xóa</button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -97,7 +120,7 @@ if (isset($conn)) {
                         </table>
                     </div>
                     <div class="mt-3 text-end">
-                        <button type="submit" class="btn btn-primary">Cập nhật giỏ hàng</button>
+                        <button type="submit" class="btn btn-outline-danger">Cập nhật giỏ hàng</button>
                     </div>
                 </form>
             <?php endif; ?>
@@ -121,7 +144,7 @@ if (isset($conn)) {
                 </div>
                 <div class="d-grid gap-3">
                     <button onclick="window.location.href='index.php'" class="btn btn-outline-primary">← Quay lại mua sắm</button>
-                    <button class="btn btn-success"><i class="fas fa-check"></i> Thanh toán ngay</button>
+                    <button onclick="window.location.href='index.php?page_layout=check-out'" class="btn btn-outline-success"><i class="fas fa-check"></i> Thanh toán ngay</button>
                 </div>
             </div>
         </div>
@@ -139,10 +162,14 @@ if (isset($conn)) {
                             <div class="card-body d-flex flex-column">
                                 <h6 class="card-title"><?= htmlspecialchars($product['name']) ?></h6>
                                 <p class="product-price mb-3"><?= number_format($product['price'], 0, ',', '.') ?>₫</p>
-                                <div class="card-actions mt-auto">
-                                    <a href="index.php?page_layout=product-detail&id=<?= $product['id'] ?>" class="btn btn-success btn-sm">XEM CHI TIẾT</a>
-                                    <button class="btn btn-primary btn-sm">THÊM VÀO GIỎ</button>
-                                </div>
+                                <div class="mt-auto d-flex gap-2">
+                                        <a href="index.php?page_layout=product-detail&id=<?php echo $product['id']; ?>" class="btn btn-outline-success btn-sm">XEM CHI TIẾT</a>
+                                        <form method="POST" class="flex-fill">
+                                            <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+                                            <input type="hidden" name="quantity" value="1">
+                                            <button type="submit" name="add_to_cart" class="btn btn-outline-primary btn-sm w-100">THÊM VÀO GIỎ HÀNG</button>
+                                        </form>
+                                    </div>
                             </div>
                         </div>
                     </div>

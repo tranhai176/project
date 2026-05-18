@@ -1,6 +1,6 @@
 ﻿<?php
 if (!isset($conn) || !$conn) {
-    require_once 'config/database.php';
+    include_once 'config/database.php';
 }
 if (!$conn) {
     die("Connection failed: Database connection is not available.");
@@ -125,11 +125,11 @@ if ($categoryResult) {
                                     <p class="text-muted small mb-2"><?php echo htmlspecialchars($product['category_name'] ?? 'Không xác định'); ?></p>
                                     <p class="mb-3"><?php echo htmlspecialchars(mb_strimwidth($product['description'] ?? '', 0, 80, '...')); ?></p>
                                     <div class="mt-auto d-flex gap-2">
-                                        <a href="index.php?page_layout=product-detail&id=<?php echo $product['id']; ?>" class="btn btn-success btn-sm">XEM CHI TIẾT</a>
+                                        <a href="index.php?page_layout=product-detail&id=<?php echo $product['id']; ?>" class="btn btn-outline-success btn-sm">XEM CHI TIẾT</a>
                                         <form method="POST" class="flex-fill">
                                             <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
                                             <input type="hidden" name="quantity" value="1">
-                                            <button type="submit" name="add_to_cart" class="btn btn-primary btn-sm w-100">THÊM VÀO GIỎ HÀNG</button>
+                                            <button type="submit" name="add_to_cart" class="btn btn-outline-primary btn-sm w-100">THÊM VÀO GIỎ HÀNG</button>
                                         </form>
                                     </div>
                                 </div>

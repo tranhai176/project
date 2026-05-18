@@ -2,6 +2,26 @@
 ob_start();
 session_start();
 include_once 'config/database.php';
+
+// Global add-to-cart handler: process POSTs from any page so single-click adds work everywhere
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
+    $product_id = isset($_POST['product_id']) ? (int) $_POST['product_id'] : 0;
+    $quantity = isset($_POST['quantity']) ? max(1, (int) $_POST['quantity']) : 1;
+    if ($product_id > 0) {
+        if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
+            $_SESSION['cart'] = [];
+        }
+        if (isset($_SESSION['cart'][$product_id])) {
+            $_SESSION['cart'][$product_id] += $quantity;
+        } else {
+            $_SESSION['cart'][$product_id] = $quantity;
+        }
+    }
+    // Redirect back to referring page if available, otherwise to cart
+    $redirect = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'index.php?page_layout=cart';
+    header('Location: ' . $redirect);
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -21,7 +41,7 @@ include_once 'config/database.php';
         <!-- Thanh hotline -->
         <div class="top-bar d-flex justify-content-between">
             <div>Hotline: 0123.456.789 (7h - 23h, 24/7)</div>
-            <div><a href="#" class="text-white text-decoration-none">Hệ thống cửa hàng</a></div>
+            <div><a class="text-white text-decoration-none">Hệ thống cửa hàng</a></div>
         </div>
 
         <!-- Logo + Banner + Tìm kiếm -->
@@ -41,6 +61,7 @@ include_once 'config/database.php';
                             <a href="login.php" class="user-link"><i class="fas fa-user"></i><span>Đăng nhập/Đăng ký</span></a>
                             <a href="#" class="user-link"><i class="fas fa-user-cog"></i><span>Tài khoản</span></a>
                             <a href="index.php?page_layout=cart" class="user-link"><i class="fas fa-shopping-cart"></i><span>Giỏ</span></a>
+                            <a href="index.php?page_layout=order-history" class="user-link"><i class="fas fa-receipt"></i><span>Đơn hàng</span></a>
                             <a href="index.php?page_layout=contact" class="user-link text-warning fw-bold"><i class="fas fa-phone"></i><span>Liên hệ</span></a>
                         </div>
                         <form class="d-flex mt-2" method="GET" action="index.php">
@@ -89,6 +110,12 @@ include_once 'config/database.php';
                         break;
                     case 'cart':
                         include_once 'cart.php';
+                        break;
+                    case 'check-out':
+                        include_once 'check-out.php';
+                        break;
+                    case 'order-history':
+                        include_once 'order-history.php';
                         break;
                     case 'contact':
                         include_once 'contact.php';
